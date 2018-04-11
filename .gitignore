@@ -1,0 +1,8 @@
+.DS_Store
+*.exe
+*.txt
+*.aux
+*.fdb*
+*.fls
+*.log
+*.synctex*
