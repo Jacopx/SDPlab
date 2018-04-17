@@ -1,0 +1,3 @@
+# SDP - Lab 4.1
+The software after it has performed the reading of the binary file, it alloc the data structure, a vector V for the number readed that map the file address space, and 2 values, left and right for the position of the quicksort. The first thread is created by the main that will wait the end of the process.
+The quicksort algorithm, based on the one provided, will reorder the vector between the 2 boundaries. Before perform 2 recursive call it create 2 copies of the main structure in order to procede to the next steps. After a check over the difference between the two indices and a size value provided by the user the recursive call is performed.

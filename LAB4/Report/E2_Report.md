@@ -1,0 +1,3 @@
+# SDP - Lab 4.2
+The greatest part of the variable are global, the must only be readed, or updated one position at the time. After the pointer allocation the arrays and the matrix are filled with random value, then the normal (no thread) multiplication is performed in order to compare the result between the 2 version. Also a mutex, for update activeThread variable, is initialized. During the thread creation only an index is passed in the args, it represent the i-th position of the vector. After the multiplication the thread check if is the last one active thread, if yes it perform the last multiplication, otherwise it reduce the activethread varible (using the mutex lock & unlock) and terminates.
+The main thread wait for the join before exit.
