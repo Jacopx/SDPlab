@@ -1,0 +1,203 @@
+System and Device Programming
+Laboratory number 08 (01 part II)
+
+
+
+Note
+----
+
+All students are requested to *up-load* on the class "portal" web page
+the solution of Exercise 03.
+Up-load the source code, i.e., the ".cpp" file (in tar-gzipped format,
+if necessary), with explanatory comments on top of the program
+(if necessary).
+Please, follow the course rules to deliver the laboratory solution.
+
+
+
+Laboratory target
+-----------------
+
+Ex 01: Familiarize with the Visual Studio Program Environment
+Ex 02: Familiarize with the UNICODE encoding system, binary files, and
+       serialized read/write operation.
+       Preliminary step for exercise 03.
+Ex 03: Random access with record update of a (serialized and binary)
+       file.
+
+
+
+Exercise 01
+-----------
+
+The following program copies a file, whose name is received as
+first parameter on the command line, into another file, whose
+name is passed as the second parameter on the command line.
+
+========================================================================
+
+#include <windows.h>
+#include <tchar.h>
+#include <stdio.h>
+
+#define BUF_SIZE 100
+
+INT _tmain (INT argc, LPTSTR argv [])
+{
+  HANDLE Hon, hOut;
+  DWORD nIn, nOut;
+  CHAR buffer [BUF_SIZE];
+
+  if (argc != 3) {
+    fprintf (stderr, "Usage: cp file1 file2\n");
+    return 1;
+  }
+
+  hIn = CreateFile (argv[1], GENERIC_READ, FILE_SHARE_READ, NULL,
+    OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+  if (hIn == INVALID_HANDLE_VALUE) {
+    fprintf ("Cannot open input file. Error: %x\n", GetLastError ());
+    return 2;
+  }
+
+  hOut = CreateFile (argv[2], GENERIC_WRITE, 0, NULL,
+    CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+  if (hOut == INVALID_HANDLE_VALUE) {
+    fprintf (stderr, "Cannot open output file. Error: %x\n", GetLastError ());
+    CloseHandle(hIn);
+    return 3;
+  }
+
+  while (ReadFile (hIn, buffer, BUF_SIZE, &nIn, NULL) && nIn > 0) {
+    WriteFile (hOut, buffer, BUF_SIZE, &nOut, NULL);
+    if (nIn != nOut) {
+      fprintf (stderr, "Fatal write error: %x\n", GetLastError ());
+      CloseHandle(hIn); CloseHandle(hOut);
+      return 4;
+    }
+  }
+
+  CloseHandle (hin);
+  CloseHandle (hOut);
+  return 0;
+}
+
+========================================================================
+
+Perform the following steps:
+- Cut-and-paste the program into a .cpp file
+- Create a new project and insert the program within the MS Visual
+  Studio environment.
+- Set the command line parameters.
+- Build (compile) the project.
+- As it contains (3?) syntax errors correct them.
+- Once obtained the executable code, run it.
+- As it contains a bug, debug it using the basic features of
+  the Visual Studio debugger.
+  Learn how to:
+  - set a break-point in the code
+  - proceed step-by-step
+  - visualize variable values
+  - see thread configuration
+  - etc.
+
+
+
+Exercise 02
+-----------
+
+An ASCII file has lines with the following format:
+- An identifier, i.e., an integer value varying from 1 to the number
+  of rows in the file (e.g., 1, 2, etc.)
+- A register number, i.e., a long integer of 6 digits (e.g., 164678)
+- A surname, i.e., a string of maximum 30 characters (e.g., Rossi)
+- A name, i.e., a string of maximum 30 characters (e.g., Mario)
+- An examination mark, i.e., an integer value.
+
+The following is a correct example of such a file:
+
+1 100000 Romano Antonio 25
+2 150000 Fabrizi Aldo 22
+3 200000 Verdi Giacomo 15
+4 250000 Rossi Luigi 30
+
+Write a C program in the MS Visual Studio environment which is able
+to:
+- Read such a file and create a new file with the exact same content
+  but stored in *binary* format and with *fixed-length* records
+  (integer + long integer + 30 characters + 30 characters + integer).
+- To verify the previous step (i.e., to be sure the binary file has
+  been stored in a proper way) re-read the binary file (the one
+  just written) and write its content on standard output.
+Input and output file names are passed on the command line.
+
+
+Suggestions
+-----------
+
+- Read the input file on a field by field basis, using the _ftscanf
+  construct (see the tchar.h file)
+- Store fields within a proper C data structure ("struct student" with
+  fields for the id, register number, etc.)
+- Store the structure onto the output file as a unique object
+  using the WriteFile function.
+- Read it back using ReadFile ...
+
+
+
+Exercise 03 (versions A, B, and C)
+----------------------------------
+
+A data base is given on a single *binary* file with
+*fixed-length* records.
+The format of the file is the one *generated in Exercise 02*.
+
+The program has to implement a user menu with the following options:
+
+- R n: Where R is the character "R", and n is an integer value.
+       Read from file all data fields for the student number n and
+       print them on standard output.
+
+- W n: Where W is the character "W", and n is an integer value.
+       Read from standard input all data fields for the student number
+       n and write them on the file in position n.
+
+- E: End the program.
+
+The input file name is given on the command line.
+
+The following is an example of execution (using the file presented in
+Exercise 02):
+
+user choice: R 3     // The user wants to read info for student 3
+3 200000 Verdi Giacomo 15
+user choice: R 1     // The user wants to read info for student 1
+1 100000 Romano Antonio 25
+user choice: W 1     // The user wants to over-write info for student 1
+                     // with info read from standard input
+Data: 1 100000 Romano Antonio 27y
+                     // Read input data and store them for student 1
+user choice: W 5     // The user wants to add data for student 5
+                     // with info read from standard input
+data: 5 157143 White House 30
+                     // Read input data and store them for student 1
+user choice: E       // The user wants to end the program
+stop program
+
+Noticed that
+1) the input file is supposed to be the one generated in
+   Exercise 02
+2) "//" specifies explanatory comments not program I/O lines
+   "R 3", "R 1", "W 1", etc. are the user inputs, all other characters
+   belong to the program output.
+
+Write three versions of the program:
+- Version A
+  read the file using SetFilePointerEx
+- Version B
+  read the file using an overlapped data structure
+- Version C
+  lock each record before reading (or writing) it, and release the
+  same record as soon as the operation has been performed.
+  (Notice that locking for now is useless, but it will be useful with
+  multi-threaded applications).
