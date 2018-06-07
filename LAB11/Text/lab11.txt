@@ -1,0 +1,188 @@
+System and Device Programming
+Laboratory number 11 (04 part II)
+
+
+
+Note
+----
+
+All students are requested to *up-load* on the class "portal" web page
+the solution of Exercise 03.
+Up-load the source code, i.e., the ".cpp" file (in tar-gzipped format,
+if necessary), with explanatory comments on top of the program
+(if necessary).
+Please, follow the course rules to deliver the laboratory solution.
+
+
+
+Laboratory target
+-----------------
+
+- Run threads.
+- Synchronize threads with several different strategies.
+- Typical synchronization paradigms.
+
+
+
+Exercise 01 (versions A, B, C and D)
+-------------------------------------
+
+A BINARY file defines the balance (i.e., the amount on money) in all
+bank accounts held in a small bank branch (this kind of file is called
+"ACCOUNT" file).
+The file stores each bank account data on a single line, with
+the following format:
+- An identifier, i.e., an integer value varying from 1 to the number
+  of rows in the file (e.g., 1, 2, etc.)
+- The bank account number, i.e., a long integer (e.g., 164678)
+- The surname account holder, i.e., a string of maximum 30 characters
+  (e.g., Rossi)
+- The name account holder, i.e., a string of maximum 30 characters
+  (e.g., Mario)
+- The bank account balance amount, i.e., an integer value (of a sum in
+  euro).
+
+The following is a correct example of such a file (in ASCII/text
+format):
+
+1 100000 Romano Antonio 1250
+2 150000 Fabrizi Aldo 2245
+3 200000 Verdi Giacomo 11115
+4 250000 Rossi Luigi 13630
+
+Another BINARY file specifies operations done on the bank accounts.
+This file (called "OPERATION" file) has the same format of the
+ACCOUNT file, i.e.:
+
+1 100000 Romano Antonio +50
+3 200000 Verdi Giacomo +115
+1 100000 Romano Antonio +250
+1 100000 Romano Antonio -55
+3 200000 Verdi Giacomo -1015
+
+(in ASCII/text format) where each positive amount describe a deposit
+in the bank account, and each negative number a withdrawal.
+
+Write a C program in the MS Visual Studio environment satisfying the
+following specifications:
+- The program receives N parameters on the command line.
+  The first parameter specify the name of an ACCOUNT file.
+  All other parameters indicate the name of OPERATION files.
+- The program has to open the ACCOUNT file, and then run N-1 threads
+  (one for each OPERATION file).
+- Each thread is in charge of reading and performing on the ACCOUNT
+  file the set of operations specified on the related OPERATION file.
+  The target of the program is to compute the final balance for all
+  bank accounts in the ACCOUNT file.
+  Obviously, threads have to be properly synchronized to avoid
+  contemporary operations on the same bank account (i.e., OPERATION
+  file 1 specifies a deposit on bank account 10, whereas OPERATION file
+  3 specifies a withdrawal).
+- When all threads have done their job, i.e., they have read their
+  OPERATION files till the end, the resulting ACCOUNT file has to be
+  printed-out on standard output by the main process, and all files
+  have to be closed.
+
+Write 4 versions of the program:
+_ Version A:
+  mutual exclusion is guaranteed adopting file locking
+  applied on a line-by-line basis (i.e., each thread
+  locks just the record it must modify).
+- Version B:
+  use critical sections to lock the entire ACCOUNT   file
+- Version C:
+  same as version B, but using mutexes
+- Version D:
+  same as version B, but using semaphores
+
+
+
+Exercise 02
+-----------
+
+Realize in the Windows environment a producer/consumer application
+with the following characteristics:
+
+1. There are P producers and C consumers
+2. Producers and consumers communicate using a circular buffer.
+   The circular buffer is implemented as a queue on a dynamic array of
+   size N.
+3. Each producer inserts in the queue integer values (randomly
+   generated) at random time intervals (randomly generated and
+   varying from 0 to T seconds).
+4. Each consumer extracts from the queue an integer value at random
+   time intervals (randomly generated and varying from 0 to T seconds)
+   and prints it out on standard output with its personal thread
+   identifier.
+
+Note that:
+- The integer values P, C, N, and T are passed to the program on the
+  command line
+- The circular queue has to be properly protected, to avoid:
+  - insertions in a full queue
+  - extractions from an empty queue
+  - insertions by two producers at the same time
+  - extractions by two consumers at the same time
+- Find a reasonable way to terminate all producers and all consumers.
+
+Suggestions
+-----------
+
+- Refer to the Producer/Consumer logical scheme with more than
+  one producer and more than one consumer working concurrently.
+- To stop the application in a reasonable way use the following
+  strategy:
+  - Each producer terminates after a predefined number of products
+    has been produced
+  - The main thread awaits for all producers to end, and when all
+    producers have terminated it terminates all consumers
+  - To terminate all consumers (after they have consumed all produced
+    elements *not* before !) the main thread may insert in the queue
+    "termination" (sentinel) values.
+
+
+
+Exercise 03
+------------
+
+A one-way bridge is approached by cars in both directions, but being
+one-way it must follow three rules:
+- Only cars from one direction can traverse the bridge in each moment,
+  either the ones moving from left-to-right or the one running from
+  right-to-left.
+- There can be multiple cars going in the same direction.
+- If cars from the opposite direction arrive while there are cars on
+  the bridge, those cars in the opposite direction must wait till the
+  bridge is cleared.
+
+Write a Windows program to synchronize all cars traversing the bridge.
+More specifically, the program must run two threads.
+The first thread is in charge of all cars moving from left-to-right.
+The second one is in charge of all cars moving from right-to-left.
+Each one of the previous two threads run one extra thread to represent
+each car.
+
+Notice that:
+- Cars running from left-to-right arrive at random time intervals,
+  varying from 0 to time_A_L2R (integer value) seconds.
+- Cars running from right-to-left arrive at random time intervals,
+  varying from 0 to time_A_R2L (integer value) seconds.
+- All cars traversing the bridge from left-to-right need time_T_L2R
+  (integer value) seconds
+- All cars traversing the bridge from right-to-left need time_T_R2L
+  (integer value) seconds
+- The program has to terminate only once exactly
+  - number_L2R (integer value) cars have traversed the bridge from
+    left-to-right
+  - number_R2L (integer value) cars have traversed the bridge from
+    right-to-left.
+
+The program must accepts 6 parameters on the command line, namely
+6 integers:
+time_A_L2R, time_A_R2L, time_T_L2R, time_T_R2L, number_L2R, number_R2L.
+
+Suggestion
+-----------
+
+Referring to the classical Reader and Writer logical scheme modify it
+to manipulate two sets of Readers.
