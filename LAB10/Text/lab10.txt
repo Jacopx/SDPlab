@@ -1,0 +1,111 @@
+System and Device Programming
+Laboratory number 10 (03 part II)
+
+
+
+Note
+----
+
+All students are requested to *up-load* on the class "portal" web page
+the solution of Exercise 02.
+Up-load the source code, i.e., the ".cpp" file (in tar-gzipped format,
+when necessary).
+Explanatory comments may be reported on top of programs (when necessary).
+Please, follow the course rules to deliver the laboratory solution.
+
+
+
+Laboratory target
+-----------------
+
+Binary files, file-systems, and multi-threaded programming with
+"advanced" synchronization (semaphores, etc.) among threads.
+
+
+
+Exercise 01
+-----------
+
+Optimize Exercise 01 of Laboratory 09 as follows.
+
+The main thread instead of waiting for the termination of all ordering
+threads *before* merging their results, it starts merging ordered
+sequences as soon as possible, i.e., every time one ordering thread
+has done its job.
+
+In other word the main thread initially has an "empty" ordered
+sequence, then:
+1. It runs all ordering threads
+2. As soon as one ordering thread terminates, it merges the ordered
+   sequence coming from this thread with its own ordered sequence.
+   (initially empty).
+   It generates a unique *new* ordered sequence.
+4. It proceeds until all ordering threads have terminated.
+   At this point the generated sequence is the desired one.
+5. It stores the final sequence into the output file.
+
+Suggestions
+-----------
+
+- Adapt the merge function to merge lists of values of increasing size
+  starting from an empty list.
+- Use function WaitForMultipleObjects such that it triggers a "merge"
+  operation as soon as one ordering thread has finished.
+  Remind that function WaitForMultipleObject can wait for an array of
+  handles and unlock the caller each time one handle signals it.
+  Nevertheless, notice that the array of handles has to be a neat and
+  clean array with no spurious elements or already terminated threads.
+  
+
+
+Exercise 02
+-----------
+
+Compare N directory trees.
+
+A C program is run with N parameters.
+Each parameter indicates a relative or an absolute path to a file
+system directory tree.
+
+The program has to compare the content of all directories trees to
+decide whether they have the same content or not.
+
+Two directories trees have the same content *if and only if* all
+directory entries (files and sub-directories) have the same name
+(excluding the path leading to the root, which differ but for
+self-comparisons).
+
+Upon termination the program has to state whether all directories have
+the same content or not.
+
+Suggestions
+-----------
+
+- The main program run one "reading" thread for each directory tree
+  plus one unique "comparing" thread.
+- Each "reading" thread visits one of the directory tree.
+  It is possible to supposed that in case of equivalent directory
+  trees, all visits proceed using the same order, i.e., they deliver
+  all entries in the same order.
+- Reading threads synchronize themselves for each entry they find,
+  waiting for each other before moving to the next entry.
+- For each entry "reading" thread activate the "comparing" thread.
+- The "comparing" thread compares the name of all entries received.
+  It stops all other threads (and the program) in case the entries are
+  not equal.
+  Otherwise, it returns the control to the "reading" threads.
+
+Observations
+------------
+
+Notice that there are at least 3 possible termination conditions
+to manage:
+- Directories are indeed equivalent.
+  This should lead to a successful termination.
+- Directories differ.
+  This can be intercepted by the comparing thread.
+- Directories are (partially) equivalent but they include a
+  different number of entries.
+  In this case it the following situation must be avoided:
+  one thread terminates its reading task whereas all other threads are
+  waiting for it.
